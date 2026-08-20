@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StockMint · 股票Mint发射台</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-brand">
+    <div class="nav-mark">S</div>
+    <div>
+      <div class="nav-title"><span class="gold">Stock</span>Mint</div>
+      <div class="nav-sub">股票 Mint 发射台</div>
+    </div>
+  </div>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+  <div class="nav-links">
+    <a href="index.html" class="active">首页</a>
+    <a href="features.html">功能展示</a>
+    <a href="lifecycle.html">发射流程</a>
+    <a href="pages.html">页面结构</a>
+    <a href="stocks.html">可用股票</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge"><span class="dot"></span> BSC Chain · 任意股票代币作为 Mint 资金 · EVM Compatible</div>
+    <h1><span class="grad">StockMint</span><br/>股票 Mint 发射台</h1>
+    <p>首创「任意股票代币作为 Mint 资金」模式。用户可用 SPCX、QQQB、AAPL、TSLA 等任意股票代币参与 Mint，不再局限于 BNB/USDT。部署者可自由指定 Mint 接受的股票代币类型。</p>
+    <div class="hero-cta">
+      <a href="features.html" class="btn btn-primary">功能展示 →</a>
+      <a href="stocks.html" class="btn btn-ghost">可用股票代币</a>
+      <a href="lifecycle.html" class="btn btn-ghost">发射流程</a>
+    </div>
+    <div class="hero-highlight">
+      <div class="hl-icon">★</div>
+      <div class="hl-text">
+        <div class="hl-title">核心亮点：任意股票作为 Mint 资金</div>
+        <div class="hl-desc">部署时指定接受哪种股票代币（如 SPCX/QQQB/AAPL/TSLA），用户用该股票代币支付即可参与 Mint。支持股票代币与 BNB/USDT 混合模式。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 20px;">
+  <div class="container">
+    <div class="stats-bar">
+      <a href="features.html" style="text-decoration:none;">
+        <div class="stat-card">
+          <div class="stat-value"><span class="grad">12</span></div>
+          <div class="stat-label">功能模块</div>
+        </div>
+      </a>
+      <a href="lifecycle.html" style="text-decoration:none;">
+        <div class="stat-card">
+          <div class="stat-value"><span class="grad">7</span></div>
+          <div class="stat-label">发射阶段</div>
+        </div>
+      </a>
+      <a href="pages.html" style="text-decoration:none;">
+        <div class="stat-card">
+          <div class="stat-value"><span class="grad">3</span></div>
+          <div class="stat-label">页面结构</div>
+        </div>
+      </a>
+      <a href="stocks.html" style="text-decoration:none;">
+        <div class="stat-card">
+          <div class="stat-value"><span class="grad">90+</span></div>
+          <div class="stat-label">可用股票代币</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Module navigation -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Modules</div>
+      <h2 class="section-title">功能模块导航</h2>
+      <p class="section-desc">点击下方模块进入对应页面查看详细展示。</p>
+    </div>
+    <div class="arch-grid">
+      <a href="features.html" style="text-decoration:none;color:inherit;">
+        <div class="arch-card">
+          <div class="arch-icon" style="background: rgba(240,185,11,0.15);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f0b90b" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3>功能展示</h3>
+          <p>12 个核心功能模块，亮点是任意股票代币作为 Mint 资金、白名单管理、阶梯税、自动回购销毁等。</p>
+        </div>
+      </a>
+      <a href="lifecycle.html" style="text-decoration:none;color:inherit;">
+        <div class="arch-card">
+          <div class="arch-icon" style="background: rgba(61,213,152,0.15);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3dd598" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3>发射流程</h3>
+          <p>七阶段生命周期：未初始化 → 已准备 → Mint 进行中 → 已关闭 → 已结算 → 流动性已注入 → 交易已开放。</p>
+        </div>
+      </a>
+      <a href="pages.html" style="text-decoration:none;color:inherit;">
+        <div class="arch-card">
+          <div class="arch-icon" style="background: rgba(255,204,102,0.15);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffcc66" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </div>
+          <h3>页面结构</h3>
+          <p>部署页、Mint 页、后台页三大页面，各自的功能配置区块和操作按钮。</p>
+        </div>
+      </a>
+      <a href="stocks.html" style="text-decoration:none;color:inherit;">
+        <div class="arch-card">
+          <div class="arch-icon" style="background: rgba(239,68,68,0.15);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+          </div>
+          <h3>可用股票代币</h3>
+          <p>90+ 美股 ETF / 个股代币，均可用作 Mint 资金。SPCX、QQQB、AAPL、TSLA、NVDA 等，按板块分类展示。</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="nav-brand" style="justify-content:center; margin-bottom:12px;">
+      <div class="nav-mark">S</div>
+      <div class="nav-title"><span class="gold">Stock</span>Mint · 股票Mint发射台</div>
+    </div>
+    <p>功能展示平台 · BSC Chain · 任意股票代币作为 Mint 资金</p>
+  </div>
+</footer>
+
+</body>
+</html>
