@@ -8,6 +8,12 @@
 </head>
 <body>
 
+<!-- Stock Ticker Tape -->
+<div class="ticker-wrap">
+  <div class="ticker-label">LIVE</div>
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
 <nav class="topnav">
   <div class="nav-brand">
     <div class="nav-mark">S</div>
@@ -26,35 +32,31 @@
 <section class="section page-wrap">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow">Available Stock Tokens</div>
+      <div class="eyebrow">Top 20 by Market Cap</div>
       <h2 class="section-title">可用股票代币</h2>
-      <p class="section-desc">以下股票代币均可作为 Mint 资金使用。部署时指定接受的股票代币，用户用该代币支付参与 Mint。</p>
+      <p class="section-desc">以下为美股市值最高的 20 只股票代币，均可作为 Mint 资金使用。部署时指定接受的股票代币，用户用该代币支付参与 Mint。数据仅作展示用途。</p>
     </div>
 
     <div class="info-banner">
       <div class="ib-icon">★</div>
       <div class="ib-text">
-        <strong>任意股票代币均可作为 Mint 资金</strong> — 部署者在部署页选择接受的股票代币类型（如 SPCX、QQQB、AAPL、TSLA 等），用户用该代币支付即可参与 Mint。数据仅作展示用途。
+        <strong>任意股票代币均可作为 Mint 资金</strong> — 部署者在部署页选择接受的股票代币类型（如 AAPL、NVDA、TSLA 等），用户用该代币支付即可参与 Mint。数据仅作展示用途。
       </div>
     </div>
 
-    <!-- Sector filter -->
-    <div class="plaza-controls">
-      <div class="plaza-tab active" data-sector="all">全部</div>
-      <div class="plaza-tab" data-sector="etf">ETF 指数</div>
-      <div class="plaza-tab" data-sector="tech">科技</div>
-      <div class="plaza-tab" data-sector="finance">金融</div>
-      <div class="plaza-tab" data-sector="consumer">消费</div>
-      <div class="plaza-tab" data-sector="energy">能源</div>
-      <div class="plaza-tab" data-sector="health">医疗</div>
-      <div class="plaza-tab" data-sector="industrial">工业</div>
-      <div class="plaza-tab" data-sector="other">其他</div>
+    <!-- Market summary -->
+    <div class="market-summary">
+      <div class="ms-item"><span class="ms-label">总代币数</span><span class="ms-val" id="msTotal">0</span></div>
+      <div class="ms-item"><span class="ms-label">上涨</span><span class="ms-val up" id="msUp">0</span></div>
+      <div class="ms-item"><span class="ms-label">下跌</span><span class="ms-val down" id="msDown">0</span></div>
+      <div class="ms-item"><span class="ms-label">最高涨幅</span><span class="ms-val up" id="msTopGainer">—</span></div>
+      <div class="ms-item"><span class="ms-label">最大跌幅</span><span class="ms-val down" id="msTopLoser">—</span></div>
     </div>
 
     <!-- Search -->
     <div class="plaza-search-wrap">
       <input id="stockSearch" type="text" class="stock-search" placeholder="搜索股票代码 / 名称..." />
-      <span id="stockCount" style="color:var(--muted); font-size:13px; margin-left:12px; white-space:nowrap;"></span>
+      <span id="stockCount" style="color:var(--muted); font-size:13px; white-space:nowrap;"></span>
     </div>
 
     <div class="stock-grid" id="stockGrid"></div>
@@ -68,130 +70,103 @@
 </footer>
 
 <script>
-const stocks = [
-  // ---- ETF 指数 ----
-  { name: "S&P 500 ETF",     sym: "SPCX",  sector: "etf", price: "578.32",  change: "+0.83%", up: true,  mcap: "—", vol: "4.2B",  color: "#1e62d6" },
-  { name: "Nasdaq 100 ETF",  sym: "QQQB",  sector: "etf", price: "489.67",  change: "+1.24%", up: true,  mcap: "—", vol: "3.8B",  color: "#227dff" },
-  { name: "Dow Jones ETF",   sym: "DIAB",  sector: "etf", price: "421.45",  change: "+0.56%", up: true,  mcap: "—", vol: "1.2B",  color: "#2d8cff" },
-  { name: "Russell 2000",    sym: "IWMB",  sector: "etf", price: "234.89",  change: "-0.34%", up: false, mcap: "—", vol: "890M",  color: "#58a6ff" },
-  { name: "Vanguard S&P",    sym: "VOOB",  sector: "etf", price: "523.12",  change: "+0.72%", up: true,  mcap: "—", vol: "2.1B",  color: "#7cc5ff" },
-  { name: "MSCI Emerging",   sym: "EEMB",  sector: "etf", price: "42.56",   change: "+1.56%", up: true,  mcap: "—", vol: "567M",  color: "#4f8cff" },
-  { name: "Gold ETF",        sym: "GLDB",  sector: "etf", price: "245.67",  change: "+2.34%", up: true,  mcap: "—", vol: "1.8B",  color: "#ffd700" },
-  { name: "Silver ETF",      sym: "SLVB",  sector: "etf", price: "28.34",   change: "+1.89%", up: true,  mcap: "—", vol: "345M",  color: "#c0c0c0" },
-  { name: "Oil ETF",         sym: "USOB",  sector: "etf", price: "78.45",   change: "-1.23%", up: false, mcap: "—", vol: "670M",  color: "#ff6b35" },
-  { name: "Bond ETF",        sym: "AGGB",  sector: "etf", price: "97.89",   change: "+0.12%", up: true,  mcap: "—", vol: "890M",  color: "#3dd598" },
-  { name: "VIX ETF",         sym: "VIXB",  sector: "etf", price: "18.34",   change: "-3.45%", up: false, mcap: "—", vol: "234M",  color: "#ff6b81" },
-  { name: "Bitcoin ETF",     sym: "IBIT",  sector: "etf", price: "52.34",   change: "+3.67%", up: true,  mcap: "—", vol: "5.6B",  color: "#f7931a" },
-  { name: "Ethereum ETF",    sym: "ETHA",  sector: "etf", price: "34.78",   change: "+2.12%", up: true,  mcap: "—", vol: "1.2B",  color: "#627eea" },
-  { name: "Real Estate ETF", sym: "VNQB",  sector: "etf", price: "167.23",  change: "+0.45%", up: true,  mcap: "—", vol: "234M",  color: "#a855f7" },
-
-  // ---- 科技 ----
-  { name: "Apple",           sym: "AAPL",  sector: "tech", price: "229.87",  change: "+1.23%", up: true,  mcap: "3.49T", vol: "52B", color: "#a2aaad" },
-  { name: "Microsoft",       sym: "MSFT",  sector: "tech", price: "423.45",  change: "+0.89%", up: true,  mcap: "3.15T", vol: "18B", color: "#00a4ef" },
-  { name: "Alphabet",       sym: "GOOGL", sector: "tech", price: "178.34",  change: "+1.56%", up: true,  mcap: "2.18T", vol: "23B", color: "#4285f4" },
-  { name: "Amazon",          sym: "AMZN",  sector: "tech", price: "186.45",  change: "+2.34%", up: true,  mcap: "1.95T", vol: "31B", color: "#ff9900" },
-  { name: "NVIDIA",          sym: "NVDA",  sector: "tech", price: "138.67",  change: "+4.56%", up: true,  mcap: "3.41T", vol: "67B", color: "#76b900" },
-  { name: "Meta Platforms", sym: "META",  sector: "tech", price: "567.89",  change: "+3.12%", up: true,  mcap: "1.43T", vol: "14B", color: "#0866ff" },
-  { name: "Tesla",           sym: "TSLA",  sector: "tech", price: "356.78",  change: "-2.34%", up: false, mcap: "1.14T", vol: "89B", color: "#cc0000" },
-  { name: "Netflix",         sym: "NFLX",  sector: "tech", price: "723.45",  change: "+1.78%", up: true,  mcap: "309B",  vol: "4B",  color: "#e50914" },
-  { name: "AMD",             sym: "AMD",   sector: "tech", price: "134.56",  change: "+3.45%", up: true,  mcap: "217B",  vol: "8B",  color: "#ed1c24" },
-  { name: "Intel",           sym: "INTC",  sector: "tech", price: "23.45",   change: "-1.23%", up: false, mcap: "100B",  vol: "3B",  color: "#0071c5" },
-  { name: "Broadcom",        sym: "AVGO",  sector: "tech", price: "178.92",  change: "+2.12%", up: true,  mcap: "834B",  vol: "5B",  color: "#cc092f" },
-  { name: "Qualcomm",        sym: "QCOM",  sector: "tech", price: "167.23",  change: "+1.34%", up: true,  mcap: "186B",  vol: "2B",  color: "#3253dc" },
-  { name: "Adobe",           sym: "ADBE",  sector: "tech", price: "489.67",  change: "+0.56%", up: true,  mcap: "217B",  vol: "1B",  color: "#ff0000" },
-  { name: "Cisco",           sym: "CSCO",  sector: "tech", price: "56.78",   change: "-0.34%", up: false, mcap: "225B",  vol: "1B",  color: "#1ba0d7" },
-  { name: "Oracle",          sym: "ORCL",  sector: "tech", price: "187.34",  change: "+1.89%", up: true,  mcap: "523B",  vol: "2B",  color: "#ff0000" },
-  { name: "IBM",             sym: "IBM",   sector: "tech", price: "234.56",  change: "+0.45%", up: true,  mcap: "215B",  vol: "1B",  color: "#0f62fe" },
-  { name: "Salesforce",      sym: "CRM",   sector: "tech", price: "345.67",  change: "+2.78%", up: true,  mcap: "336B",  vol: "2B",  color: "#00a1e0" },
-  { name: "TSMC",            sym: "TSM",   sector: "tech", price: "198.45",  change: "+1.23%", up: true,  mcap: "1.03T", vol: "3B",  color: "#c9131e" },
-  { name: "ASML",            sym: "ASML",  sector: "tech", price: "689.23",  change: "+3.45%", up: true,  mcap: "272B",  vol: "1B",  color: "#0a6ca8" },
-  { name: "Palantir",        sym: "PLTR",  sector: "tech", price: "67.89",   change: "+5.67%", up: true,  mcap: "156B",  vol: "4B",  color: "#000000" },
-
-  // ---- 金融 ----
-  { name: "JPMorgan Chase",  sym: "JPM",   sector: "finance", price: "234.56", change: "+1.12%", up: true,  mcap: "670B",  vol: "3B",  color: "#1a4480" },
-  { name: "Bank of America", sym: "BAC",   sector: "finance", price: "45.67",  change: "+0.89%", up: true,  mcap: "356B",  vol: "2B",  color: "#0e4f9f" },
-  { name: "Goldman Sachs",   sym: "GS",    sector: "finance", price: "567.89", change: "+2.34%", up: true,  mcap: "189B",  vol: "1B",  color: "#7399c6" },
-  { name: "Morgan Stanley",  sym: "MS",    sector: "finance", price: "123.45", change: "+1.56%", up: true,  mcap: "201B",  vol: "1B",  color: "#000000" },
-  { name: "Visa",            sym: "V",     sector: "finance", price: "312.45", change: "+0.78%", up: true,  mcap: "634B",  vol: "1B",  color: "#1a1f71" },
-  { name: "Mastercard",      sym: "MA",    sector: "finance", price: "523.67", change: "+1.34%", up: true,  mcap: "489B",  vol: "1B",  color: "#eb001b" },
-  { name: "Wells Fargo",     sym: "WFC",   sector: "finance", price: "78.34",  change: "-0.56%", up: false, mcap: "256B",  vol: "1B",  color: "#d71e28" },
-  { name: "American Express",sym: "AXP",   sector: "finance", price: "289.45", change: "+2.12%", up: true,  mcap: "257B",  vol: "1B",  color: "#2e77bc" },
-  { name: "BlackRock",       sym: "BLK",   sector: "finance", price: "987.23", change: "+1.89%", up: true,  mcap: "146B",  vol: "1B",  color: "#000000" },
-  { name: "Berkshire",       sym: "BRKB",  sector: "finance", price: "456.78", change: "+0.67%", up: true,  mcap: "980B",  vol: "1B",  color: "#0085ca" },
-
-  // ---- 消费 ----
-  { name: "Coca-Cola",       sym: "KO",    sector: "consumer", price: "62.34",  change: "+0.45%", up: true,  mcap: "268B",  vol: "1B",  color: "#f40009" },
-  { name: "PepsiCo",         sym: "PEP",   sector: "consumer", price: "167.45", change: "+1.23%", up: true,  mcap: "229B",  vol: "1B",  color: "#004b93" },
-  { name: "Walmart",         sym: "WMT",   sector: "consumer", price: "92.34",  change: "+0.89%", up: true,  mcap: "742B",  vol: "1B",  color: "#0071ce" },
-  { name: "McDonald's",      sym: "MCD",   sector: "consumer", price: "298.45", change: "+1.56%", up: true,  mcap: "215B",  vol: "1B",  color: "#ffc52e" },
-  { name: "Nike",            sym: "NKE",   sector: "consumer", price: "78.92",  change: "-1.34%", up: false, mcap: "118B",  vol: "1B",  color: "#000000" },
-  { name: "Starbucks",       sym: "SBUX",  sector: "consumer", price: "102.34", change: "+2.45%", up: true,  mcap: "116B",  vol: "1B",  color: "#00704a" },
-  { name: "Procter & Gamble",sym: "PG",    sector: "consumer", price: "167.89", change: "+0.34%", up: true,  mcap: "395B",  vol: "1B",  color: "#003da5" },
-  { name: "Costco",          sym: "COST",  sector: "consumer", price: "892.34", change: "+1.78%", up: true,  mcap: "396B",  vol: "1B",  color: "#005daa" },
-  { name: "Home Depot",      sym: "HD",    sector: "consumer", price: "389.45", change: "+0.92%", up: true,  mcap: "387B",  vol: "1B",  color: "#f96302" },
-
-  // ---- 能源 ----
-  { name: "Exxon Mobil",     sym: "XOM",   sector: "energy", price: "118.34",  change: "-1.23%", up: false, mcap: "523B",  vol: "3B",  color: "#ff1493" },
-  { name: "Chevron",         sym: "CVX",   sector: "energy", price: "156.78",  change: "-0.89%", up: false, mcap: "290B",  vol: "2B",  color: "#00498f" },
-  { name: "ConocoPhillips",  sym: "COP",   sector: "energy", price: "108.45",  change: "+0.56%", up: true,  mcap: "128B",  vol: "1B",  color: "#0a3d62" },
-  { name: "Shell",           sym: "SHEL",  sector: "energy", price: "67.89",   change: "+1.34%", up: true,  mcap: "230B",  vol: "1B",  color: "#ffcc00" },
-  { name: "TotalEnergies",   sym: "TTE",   sector: "energy", price: "67.45",   change: "+0.78%", up: true,  mcap: "156B",  vol: "1B",  color: "#ed1c24" },
-  { name: "BP",              sym: "BP",    sector: "energy", price: "34.56",   change: "-0.45%", up: false, mcap: "97B",   vol: "1B",  color: "#009e49" },
-  { name: "Schlumberger",    sym: "SLB",   sector: "energy", price: "45.67",   change: "+2.34%", up: true,  mcap: "98B",   vol: "1B",  color: "#ff6c00" },
-
-  // ---- 医疗 ----
-  { name: "Johnson & Johnson",sym: "JNJ",  sector: "health", price: "156.78",  change: "+0.34%", up: true,  mcap: "378B",  vol: "1B",  color: "#cc0000" },
-  { name: "Pfizer",           sym: "PFE",  sector: "health", price: "28.34",   change: "-1.12%", up: false, mcap: "160B",  vol: "2B",  color: "#0093d0" },
-  { name: "UnitedHealth",     sym: "UNH",  sector: "health", price: "523.45",  change: "+1.23%", up: true,  mcap: "481B",  vol: "1B",  color: "#002677" },
-  { name: "Abbott",           sym: "ABT",  sector: "health", price: "112.45",  change: "+0.89%", up: true,  mcap: "196B",  vol: "1B",  color: "#009e4d" },
-  { name: "Merck",            sym: "MRK",  sector: "health", price: "100.34",  change: "+0.67%", up: true,  mcap: "254B",  vol: "1B",  color: "#00b0f0" },
-  { name: "Moderna",          sym: "MRNA", sector: "health", price: "89.67",   change: "-2.34%", up: false, mcap: "34B",   vol: "1B",  color: "#0a3255" },
-  { name: "Eli Lilly",        sym: "LLY",  sector: "health", price: "789.45",  change: "+3.45%", up: true,  mcap: "749B",  vol: "1B",  color: "#d32831" },
-  { name: "Thermo Fisher",    sym: "TMO",  sector: "health", price: "534.67",  change: "+1.12%", up: true,  mcap: "204B",  vol: "1B",  color: "#cc0000" },
-
-  // ---- 工业 ----
-  { name: "Boeing",          sym: "BA",    sector: "industrial", price: "178.45", change: "+2.34%", up: true,  mcap: "134B",  vol: "2B",  color: "#003a70" },
-  { name: "Caterpillar",     sym: "CAT",   sector: "industrial", price: "389.23", change: "+1.45%", up: true,  mcap: "189B",  vol: "1B",  color: "#ffcd00" },
-  { name: "GE Aerospace",    sym: "GE",    sector: "industrial", price: "186.34", change: "+3.12%", up: true,  mcap: "203B",  vol: "1B",  color: "#0876b9" },
-  { name: "Honeywell",        sym: "HON",   sector: "industrial", price: "234.56", change: "+0.78%", up: true,  mcap: "156B",  vol: "1B",  color: "#ff6600" },
-  { name: "3M",              sym: "MMM",   sector: "industrial", price: "128.45", change: "-0.34%", up: false, mcap: "73B",   vol: "1B",  color: "#ff0000" },
-  { name: "Lockheed Martin", sym: "LMT",   sector: "industrial", price: "567.89", change: "+1.56%", up: true,  mcap: "136B",  vol: "1B",  color: "#000000" },
-  { name: "Deere",           sym: "DE",    sector: "industrial", price: "423.45", change: "+2.12%", up: true,  mcap: "122B",  vol: "1B",  color: "#367c2b" },
-  { name: "RTX",             sym: "RTX",   sector: "industrial", price: "123.45", change: "+0.89%", up: true,  mcap: "162B",  vol: "1B",  color: "#003057" },
-
-  // ---- 其他 ----
-  { name: "Disney",          sym: "DIS",   sector: "other", price: "96.78",   change: "+1.23%", up: true,  mcap: "175B",  vol: "1B",  color: "#0000ff" },
-  { name: "Alibaba",         sym: "BABA",  sector: "other", price: "89.34",   change: "+2.45%", up: true,  mcap: "213B",  vol: "1B",  color: "#ff6a00" },
-  { name: "Tencent ADR",     sym: "TCEHY", sector: "other", price: "56.78",   change: "+0.56%", up: true,  mcap: "523B",  vol: "1B",  color: "#00a4ff" },
-  { name: "JD.com",          sym: "JD",    sector: "other", price: "34.56",   change: "-1.23%", up: false, mcap: "54B",   vol: "1B",  color: "#e1251b" },
-  { name: "NIO",             sym: "NIO",   sector: "other", price: "7.89",    change: "+5.67%", up: true,  mcap: "17B",   vol: "1B",  color: "#00bcd4" },
-  { name: "Lucid",           sym: "LCID",  sector: "other", price: "3.45",    change: "+3.45%", up: true,  mcap: "8B",    vol: "1B",  color: "#0d2c54" },
-  { name: "Riot Platforms",  sym: "RIOT",  sector: "other", price: "12.34",   change: "+8.92%", up: true,  mcap: "4B",    vol: "1B",  color: "#000000" },
-  { name: "Coinbase",        sym: "COIN",  sector: "other", price: "289.45",  change: "+4.56%", up: true,  mcap: "72B",   vol: "2B",  color: "#0052ff" },
-  { name: "Roblox",          sym: "RBLX",  sector: "other", price: "56.78",   change: "+2.34%", up: true,  mcap: "37B",   vol: "1B",  color: "#000000" },
-  { name: "Uber",            sym: "UBER",  sector: "other", price: "72.34",   change: "+1.89%", up: true,  mcap: "151B",  vol: "1B",  color: "#000000" },
-  { name: "Airbnb",          sym: "ABNB",  sector: "other", price: "134.56",  change: "+0.67%", up: true,  mcap: "88B",   vol: "1B",  color: "#ff5a5f" },
-  { name: "Shopify",         sym: "SHOP",  sector: "other", price: "134.67",  change: "+3.12%", up: true,  mcap: "174B",  vol: "1B",  color: "#95bf47" },
+// Ticker data (shared)
+const tickerStocks = [
+  { sym: "SPCX", price: "5783.43", change: "+0.84%", up: true },
+  { sym: "QQQB", price: "20456.78", change: "+1.25%", up: true },
+  { sym: "DIAB", price: "42154.67", change: "+0.57%", up: true },
+  { sym: "AAPL", price: "229.87", change: "+1.23%", up: true },
+  { sym: "NVDA", price: "138.67", change: "+4.56%", up: true },
+  { sym: "TSLA", price: "356.78", change: "-2.34%", up: false },
+  { sym: "MSFT", price: "423.45", change: "+0.89%", up: true },
+  { sym: "GOOGL", price: "178.34", change: "+1.56%", up: true },
+  { sym: "AMZN", price: "186.45", change: "+2.34%", up: true },
+  { sym: "META", price: "567.89", change: "+3.12%", up: true },
+  { sym: "GLDB", price: "245.67", change: "+2.34%", up: true },
+  { sym: "IBIT", price: "52.34", change: "+3.67%", up: true },
+  { sym: "VIXB", price: "15.43", change: "-3.44%", up: false },
+  { sym: "JPM", price: "234.56", change: "+1.12%", up: true },
+  { sym: "LLY", price: "789.45", change: "+3.45%", up: true },
+  { sym: "AMD", price: "134.56", change: "+3.45%", up: true },
+  { sym: "PLTR", price: "67.89", change: "+5.67%", up: true },
+  { sym: "COIN", price: "289.45", change: "+4.56%", up: true },
 ];
 
-const sectorMap = {
-  etf: "ETF 指数", tech: "科技", finance: "金融", consumer: "消费",
-  energy: "能源", health: "医疗", industrial: "工业", other: "其他",
-};
+function renderTicker() {
+  const track = document.getElementById("tickerTrack");
+  const items = [...tickerStocks, ...tickerStocks].map(s => {
+    const cls = s.up ? "up" : "down";
+    const arrow = s.up ? "\u25B2" : "\u25BC";
+    return `<div class="ticker-item"><span class="ts">${s.sym}</span><span class="tp">$${s.price}</span><span class="tc ${cls}">${arrow} ${s.change}</span></div>`;
+  }).join("");
+  track.innerHTML = items;
+}
+renderTicker();
 
-let curSector = "all";
+// Top 20 US stocks by market cap, with company logos via Clearbit
+const stocks = [
+  { rank: 1,  name: "Apple",           sym: "AAPL",  sector: "科技", price: "229.87",  change: "+1.23%",  up: true,  mcap: "3.49T", vol: "52B", pe: "35.6",  div: "0.44%", w52h: "237",  w52l: "164",  color: "#a2aaad", logo: "https://logo.clearbit.com/apple.com",            spark: [18,16,14,12,14,10,8,6,4,3,2] },
+  { rank: 2,  name: "NVIDIA",          sym: "NVDA",  sector: "科技", price: "138.67",  change: "+4.56%",  up: true,  mcap: "3.41T", vol: "67B", pe: "65.4",  div: "0.03%", w52h: "141",  w52l: "47",   color: "#76b900", logo: "https://logo.clearbit.com/nvidia.com",            spark: [24,22,20,18,14,12,8,6,4,2,1] },
+  { rank: 3,  name: "Microsoft",       sym: "MSFT",  sector: "科技", price: "423.45",  change: "+0.89%",  up: true,  mcap: "3.15T", vol: "18B", pe: "36.2",  div: "0.72%", w52h: "432",  w52l: "324",  color: "#00a4ef", logo: "https://logo.clearbit.com/microsoft.com",        spark: [16,14,12,14,10,8,10,6,4,3,2] },
+  { rank: 4,  name: "Alphabet",        sym: "GOOGL", sector: "科技", price: "178.34",  change: "+1.56%",  up: true,  mcap: "2.18T", vol: "23B", pe: "24.8",  div: "0.45%", w52h: "181",  w52l: "130",  color: "#4285f4", logo: "https://logo.clearbit.com/google.com",            spark: [18,16,14,12,10,8,6,4,3,2,1] },
+  { rank: 5,  name: "Amazon",          sym: "AMZN",  sector: "科技", price: "186.45",  change: "+2.34%",  up: true,  mcap: "1.95T", vol: "31B", pe: "46.3",  div: "—",     w52h: "189",  w52l: "139",  color: "#ff9900", logo: "https://logo.clearbit.com/amazon.com",             spark: [20,18,16,14,12,10,8,6,4,3,2] },
+  { rank: 6,  name: "Meta Platforms",  sym: "META",  sector: "科技", price: "567.89",  change: "+3.12%",  up: true,  mcap: "1.43T", vol: "14B", pe: "27.1",  div: "0.39%", w52h: "573",  w52l: "313",  color: "#0866ff", logo: "https://logo.clearbit.com/meta.com",               spark: [20,18,16,14,12,10,8,6,4,2,1] },
+  { rank: 7,  name: "Tesla",           sym: "TSLA",  sector: "科技", price: "356.78",  change: "-2.34%",  up: false, mcap: "1.14T", vol: "89B", pe: "68.2",  div: "—",     w52h: "368",  w52l: "167",  color: "#cc0000", logo: "https://logo.clearbit.com/tesla.com",              spark: [4,6,8,10,12,14,16,18,20,22,24] },
+  { rank: 8,  name: "TSMC",            sym: "TSM",   sector: "科技", price: "198.45",  change: "+1.23%",  up: true,  mcap: "1.03T", vol: "3B",  pe: "32.1",  div: "1.23%", w52h: "201",  w52l: "118",  color: "#c9131e", logo: "https://logo.clearbit.com/tsmc.com",               spark: [16,14,12,14,10,8,6,4,3,2,1] },
+  { rank: 9,  name: "Berkshire",       sym: "BRK.B", sector: "金融", price: "456.78",  change: "+0.67%",  up: true,  mcap: "980B",  vol: "1B",  pe: "15.2",  div: "—",     w52h: "462",  w52l: "361",  color: "#0085ca", logo: "https://logo.clearbit.com/berkshirehathaway.com",  spark: [12,10,14,8,12,6,10,4,8,3,4] },
+  { rank: 10, name: "Broadcom",        sym: "AVGO",  sector: "科技", price: "178.92",  change: "+2.12%",  up: true,  mcap: "834B",  vol: "5B",  pe: "34.8",  div: "1.21%", w52h: "182",  w52l: "103",  color: "#cc092f", logo: "https://logo.clearbit.com/broadcom.com",           spark: [18,16,14,12,10,8,6,4,3,2,1] },
+  { rank: 11, name: "Eli Lilly",       sym: "LLY",   sector: "医疗", price: "789.45",  change: "+3.45%",  up: true,  mcap: "749B",  vol: "1B",  pe: "112.4", div: "0.67%", w52h: "793",  w52l: "563",  color: "#d32831", logo: "https://logo.clearbit.com/lilly.com",             spark: [22,20,18,14,12,10,8,6,4,2,1] },
+  { rank: 12, name: "Walmart",         sym: "WMT",   sector: "消费", price: "92.34",   change: "+0.89%",  up: true,  mcap: "742B",  vol: "1B",  pe: "31.2",  div: "1.23%", w52h: "93",   w52l: "56",   color: "#0071ce", logo: "https://logo.clearbit.com/walmart.com",            spark: [12,10,14,8,12,6,10,4,8,3,4] },
+  { rank: 13, name: "JPMorgan Chase",  sym: "JPM",   sector: "金融", price: "234.56",  change: "+1.12%",  up: true,  mcap: "670B",  vol: "3B",  pe: "12.8",  div: "2.12%", w52h: "237",  w52l: "143",  color: "#1a4480", logo: "https://logo.clearbit.com/jpmorganchase.com",      spark: [14,12,14,10,12,8,6,4,3,2,1] },
+  { rank: 14, name: "Visa",            sym: "V",     sector: "金融", price: "312.45",  change: "+0.78%",  up: true,  mcap: "634B",  vol: "1B",  pe: "31.2",  div: "0.78%", w52h: "315",  w52l: "227",  color: "#1a1f71", logo: "https://logo.clearbit.com/visa.com",               spark: [12,10,14,8,12,6,10,4,8,3,4] },
+  { rank: 15, name: "Exxon Mobil",     sym: "XOM",   sector: "能源", price: "118.34",  change: "-1.23%",  up: false, mcap: "523B",  vol: "3B",  pe: "14.2",  div: "3.23%", w52h: "126",  w52l: "95",   color: "#ff1493", logo: "https://logo.clearbit.com/exxonmobil.com",         spark: [6,8,10,8,12,10,14,12,16,18,20] },
+  { rank: 16, name: "Mastercard",      sym: "MA",    sector: "金融", price: "523.67",  change: "+1.34%",  up: true,  mcap: "489B",  vol: "1B",  pe: "38.6",  div: "0.56%", w52h: "528",  w52l: "392",  color: "#eb001b", logo: "https://logo.clearbit.com/mastercard.com",         spark: [14,12,10,12,8,6,4,3,2,1,1] },
+  { rank: 17, name: "UnitedHealth",    sym: "UNH",   sector: "医疗", price: "523.45",  change: "+1.23%",  up: true,  mcap: "481B",  vol: "1B",  pe: "36.8",  div: "1.34%", w52h: "528",  w52l: "436",  color: "#002677", logo: "https://logo.clearbit.com/unitedhealthgroup.com",  spark: [16,14,12,10,8,6,4,3,2,1,1] },
+  { rank: 18, name: "Costco",          sym: "COST",  sector: "消费", price: "892.34",  change: "+1.78%",  up: true,  mcap: "396B",  vol: "1B",  pe: "55.6",  div: "0.56%", w52h: "896",  w52l: "673",  color: "#005daa", logo: "https://logo.clearbit.com/costco.com",             spark: [16,14,12,10,8,6,4,3,2,1,1] },
+  { rank: 19, name: "Procter & Gamble",sym: "PG",    sector: "消费", price: "167.89",  change: "+0.34%",  up: true,  mcap: "395B",  vol: "1B",  pe: "28.3",  div: "2.23%", w52h: "169",  w52l: "152",  color: "#003da5", logo: "https://logo.clearbit.com/pg.com",                 spark: [12,10,14,8,12,6,10,4,8,3,4] },
+  { rank: 20, name: "Home Depot",      sym: "HD",    sector: "消费", price: "389.45",  change: "+0.92%",  up: true,  mcap: "387B",  vol: "1B",  pe: "26.2",  div: "2.12%", w52h: "392",  w52l: "313",  color: "#f96302", logo: "https://logo.clearbit.com/homedepot.com",         spark: [14,12,10,12,8,6,4,3,2,1,1] },
+];
+
+function genSpark(spark, up) {
+  const max = Math.max(...spark);
+  const min = Math.min(...spark);
+  const range = max - min || 1;
+  const w = 200, h = 36;
+  const step = w / (spark.length - 1);
+  const pts = spark.map((v, i) => `${(i * step).toFixed(1)},${(h - ((v - min) / range) * h).toFixed(1)}`).join(" ");
+  const last = spark[spark.length - 1];
+  const lastX = w;
+  const lastY = h - ((last - min) / range) * h;
+  const color = up ? "#ff4444" : "#00c853";
+  const fill = up ? "rgba(255,68,68,0.08)" : "rgba(0,200,83,0.08)";
+  return `<svg class="stock-spark" width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <polygon fill="${fill}" stroke="none" points="${pts} ${w},${h} 0,${h}"/>
+    <polyline fill="none" stroke="${color}" stroke-width="1.5" points="${pts}"/>
+    <circle cx="${lastX}" cy="${lastY}" r="2.5" fill="${color}"/>
+  </svg>`;
+}
+
 let curSearch = "";
 
 function renderStocks() {
   const grid = document.getElementById("stockGrid");
   let list = stocks;
-  if (curSector !== "all") list = list.filter(s => s.sector === curSector);
   if (curSearch) {
     const q = curSearch.toLowerCase();
     list = list.filter(s => s.name.toLowerCase().includes(q) || s.sym.toLowerCase().includes(q));
   }
 
+  // Update market summary
+  const upCount = list.filter(s => s.up).length;
+  const downCount = list.filter(s => !s.up).length;
   document.getElementById("stockCount").textContent = `共 ${list.length} 个可用`;
+  document.getElementById("msTotal").textContent = list.length;
+  document.getElementById("msUp").textContent = upCount;
+  document.getElementById("msDown").textContent = downCount;
+  const gainers = list.filter(s => s.up).sort((a,b) => parseFloat(b.change) - parseFloat(a.change));
+  const losers = list.filter(s => !s.up).sort((a,b) => parseFloat(b.change.replace("-","")) - parseFloat(a.change.replace("-","")));
+  document.getElementById("msTopGainer").textContent = gainers.length ? `${gainers[0].sym} ${gainers[0].change}` : "—";
+  document.getElementById("msTopLoser").textContent = losers.length ? `${losers[0].sym} ${losers[0].change}` : "—";
 
   if (list.length === 0) {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted);">未找到匹配的股票代币</div>`;
@@ -201,38 +176,40 @@ function renderStocks() {
   grid.innerHTML = list.map(s => {
     const changeCls = s.up ? "up" : "down";
     const changeIcon = s.up ? "\u25B2" : "\u25BC";
-    const sectorLabel = sectorMap[s.sector] || s.sector;
     return `
     <div class="stock-card">
       <span class="stock-mint-badge">Mint \u53EF\u7528</span>
       <div class="stock-head">
-        <div class="stock-logo" style="background:${s.color};">${s.sym.slice(0,2)}</div>
+        <div class="stock-logo" style="background:${s.color};">
+          <span class="stock-rank">#${s.rank}</span>
+          <img src="${s.logo}" alt="${s.name}" onerror="this.style.display='none'" />
+        </div>
         <div class="stock-info">
           <h4>${s.name}</h4>
           <div class="sym">${s.sym}</div>
         </div>
       </div>
       <div class="stock-body">
-        <div class="stock-price">$${s.price}</div>
-        <div class="stock-change ${changeCls}">${changeIcon} ${s.change}</div>
+        <div class="stock-price-row">
+          <div class="stock-price">$${s.price}</div>
+          <div class="stock-change ${changeCls}">${changeIcon} ${s.change}</div>
+        </div>
+        ${genSpark(s.spark, s.up)}
         <div class="stock-stats">
           <div class="stock-stat"><div class="label">\u5E02\u503C</div><div class="value">${s.mcap}</div></div>
           <div class="stock-stat"><div class="label">\u6210\u4EA4\u91CF</div><div class="value">$${s.vol}</div></div>
+          <div class="stock-stat"><div class="label">P/E</div><div class="value">${s.pe}</div></div>
+          <div class="stock-stat"><div class="label">\u80A1\u606F</div><div class="value">${s.div}</div></div>
+          <div class="stock-stat"><div class="label">52w \u9AD8</div><div class="value">$${s.w52h}</div></div>
+          <div class="stock-stat"><div class="label">52w \u4F4E</div><div class="value">$${s.w52l}</div></div>
         </div>
-        <span class="stock-sector">${sectorLabel}</span>
+        <div class="stock-footer">
+          <span class="stock-sector">${s.sector}</span>
+        </div>
       </div>
     </div>`;
   }).join("");
 }
-
-document.querySelectorAll(".plaza-tab[data-sector]").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".plaza-tab[data-sector]").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    curSector = tab.dataset.sector;
-    renderStocks();
-  });
-});
 
 document.getElementById("stockSearch").addEventListener("input", (e) => {
   curSearch = e.target.value.trim();
